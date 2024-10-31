@@ -6,6 +6,14 @@ const twilioRoutes = require('./twilioService');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.get('/', (req, res) => {
+    res.send('¡Hola, mundo!');
+  });
+  
+module.exports = (req, res) => {
+    app(req, res);
+};
+
 app.use(cors({ origin: ['https://caferouse.com/tienda/pagar/'] }));
 app.use(express.json());
 
