@@ -9,6 +9,10 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ origin: ['https://caferouse.com/tienda/pagar/'] }));
 app.use(express.json());
 
+app.get('/', (req, res) => {
+  res.send('¡Hola, mundo!');
+});
+
 // app.use('/api/stripe', stripeRoutes);
 app.use('/api/twilio', twilioRoutes);
 
