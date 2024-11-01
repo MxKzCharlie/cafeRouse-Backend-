@@ -16,10 +16,6 @@ app.get('/', (req, res) => {
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/twilio', twilioRoutes);
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
-});
-
 module.exports = (req, res) => {
   app(req, res);
 };
