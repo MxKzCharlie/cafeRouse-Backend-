@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const stripeRoutes = require('./stripeService');
 const twilioRoutes = require('./twilioService');
+const PORT = process.env.PORT;
 
 const app = express();
 
@@ -14,6 +15,10 @@ app.get('/', (req, res) => {
 
 app.use('/api/stripe', stripeRoutes);
 app.use('/api/twilio', twilioRoutes);
+
+app.listen(PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+});
 
 module.exports = (req, res) => {
   app(req, res);

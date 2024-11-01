@@ -1,10 +1,11 @@
 require('dotenv').config();
+console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY);
 const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 router.post('/create-checkout-session', async (req, res) => {
-  const total = req.total * 100;
+  const total = req.body.total * 100;
   
   try {
     const session = await stripe.checkout.sessions.create({
