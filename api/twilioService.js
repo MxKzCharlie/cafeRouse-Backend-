@@ -47,10 +47,9 @@ router.post('/send-sms-pickup', async (req, res) => {
             }),
             contentSid: 'HX98f9b1293fcdb976c0fa8bc116af3746',
             from: '+14702038017',
-            to: '+526643367495',
+            to: '+526647354900',
         });
 
-        console.log("Se realizo la operacion coon exito");
         res.status(200).json({ success: true});
     } catch (error) {
         console.error(error);
