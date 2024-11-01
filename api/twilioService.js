@@ -50,6 +50,7 @@ router.post('/send-sms-pickup', async (req, res) => {
             to: '+526643367495',
         });
 
+        console.log("Se realizo la operacion coon exito");
         res.status(200).json({ success: true});
     } catch (error) {
         console.error(error);
@@ -128,19 +129,6 @@ router.post('/send-sms-delivery', async (req, res) => {
         res.status(500).json({ success: false, error: 'No se pudo enviar el mensaje' });
     }
 });
-
-router.post('/webhooks/message-status', (req, res) => {
-    const messageSid = req.body.MessageSid;
-    const messageStatus = req.body.MessageStatus;
-  
-    console.log(`Mensaje SID: ${messageSid}, Estado: ${messageStatus}`);
-  
-    if(messageStatus == 500){
-        res.sendStatus(500);
-    }else{
-        res.sendStatus(200);
-    }
-  });
   
 
 module.exports = router;
