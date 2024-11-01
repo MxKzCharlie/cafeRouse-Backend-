@@ -4,13 +4,24 @@ const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 router.post('/create-checkout-session', async (req, res) => {
+  const total = req.total * 100;
+  
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
-      line_items: req.body.items,
+      line_items: [
+        {
+          price_data: {
+            currency: 'mxn',
+            product: 'prod_R8YPyL0vvCxTLS',
+            unit_amount: total,
+          },
+          quantity: 1,
+        },
+      ],
       mode: 'payment',
-      success_url: 'http://localhost:3000/success',
-      cancel_url: 'http://localhost:3000/cancel',
+      success_url: 'https://caferouse.com/tienda/pagar/',
+      cancel_url: 'https://caferouse.com/tienda/pagar/',
     });
     res.json({ url: session.url });
   } catch (error) {
