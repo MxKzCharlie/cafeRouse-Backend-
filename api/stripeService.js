@@ -21,7 +21,7 @@ router.post('/create-checkout-session', async (req, res) => {
         },
       ],
       mode: 'payment',
-      success_url: 'https://caferouse.com//thankyou/delivery/',
+      success_url: 'https://caferouse.com/thankyou/delivery/',
       cancel_url: 'https://caferouse.com/tienda/pagar/',
     });
     res.json({ url: session.url });
