@@ -47,7 +47,7 @@ router.post('/send-sms-pickup', async (req, res) => {
             }),
             contentSid: 'HX98f9b1293fcdb976c0fa8bc116af3746',
             from: '+14702038017',
-            to: '+526643367495',
+            to: '+526647354900',
         });
 
         res.status(200).json({ success: true});
@@ -119,7 +119,7 @@ router.post('/send-sms-delivery', async (req, res) => {
             }),
             contentSid: 'HX468c83f64d824575ee3b44f06a908631',
             from: '+14702038017',
-            to: '+526643367495',
+            to: '+526647354900',
         });
 
         res.status(200).json({ success: true });
