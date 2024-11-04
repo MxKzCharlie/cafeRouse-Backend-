@@ -96,6 +96,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
   if (event.type === "payment_intent.succeeded") {
     const paymentIntent = event.data.object;
+    console.log(paymentIntent.metadata);
 
     try {
       const messageToClient = await twilio.messages.create({
