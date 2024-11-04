@@ -96,14 +96,16 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
   if (event.type === "payment_intent.succeeded") {
     const paymentIntent = event.data.object;
-    console.log(paymentIntent.metadata);
+
+    const updatedPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntent.id);
+    console.log(updatedPaymentIntent.metadata);
 
     try {
       const messageToClient = await twilio.messages.create({
         contentVariables: JSON.stringify({ "1": paymentIntent.metadata.nombre }),
         contentSid: 'HX7c85110cce002b720781987578f54036',
         from: '+14702038017',
-        to: String(paymentIntent.metadata.numTel),
+        to: updatedPaymentIntent.metadata.numTel,
       });
       console.log("Mensaje al cliente enviado:", messageToClient.sid);
     } catch (error) {
