@@ -80,10 +80,10 @@ router.post('/create-checkout-session', async (req, res) => {
   }
 });
 
-//<---------- WebHook de STRIPE ---------->
+//<---------- WebHook Of STRIPE ---------->
 
-router.post('/webhook', async (req, res) => {
-  const endpointSecret = "whsec_CdWXbyIgbc70v00OMiMAS3OJMiizxVU8"; 
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+  const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET; 
   const sig = req.headers["stripe-signature"];
 
   let event;
@@ -97,29 +97,41 @@ router.post('/webhook', async (req, res) => {
   if (event.type === "payment_intent.succeeded") {
     const paymentIntent = event.data.object;
 
-    //Message for Client
-    twilio.messages.create({
-        contentVariables: JSON.stringify({"1": paymentIntent.metadata.nombre}),
+    try {
+      const messageToClient = await twilio.messages.create({
+        contentVariables: JSON.stringify({ "1": paymentIntent.metadata.nombre }),
         contentSid: 'HX7c85110cce002b720781987578f54036',
         from: '+14702038017',
         to: paymentIntent.metadata.numTel,
-    }).then(message => console.log("Mensaje al cliente enviado:", message.sid))
-      .catch(error => console.error("Error al enviar mensaje al cliente:", error));
+      });
+      console.log("Mensaje al cliente enviado:", messageToClient.sid);
+    } catch (error) {
+      console.error("Error al enviar mensaje al cliente:", error);
+      return res.sendStatus(500);
+    }
 
-    //Message for coffee shop
-    twilio.messages.create({
+    // Mensaje para la cafetería
+    try {
+      const messageToCoffeeShop = await twilio.messages.create({
         contentVariables: JSON.stringify({
-            "1": paymentIntent.metadata.nombre,
-            "2": paymentIntent.metadata.order,
-            "3": `$${paymentIntent.metadata.total}`,
-            "4": paymentIntent.metadata.pago,
-            "5": paymentIntent.metadata.adress
+          "1": paymentIntent.metadata.nombre,
+          "2": paymentIntent.metadata.order,
+          "3": `$${paymentIntent.metadata.total}`,
+          "4": paymentIntent.metadata.pago,
+          "5": paymentIntent.metadata.adress
         }),
         contentSid: 'HX468c83f64d824575ee3b44f06a908631',
         from: '+14702038017',
         to: '+526647354900',
-    }).then(message => console.log("Mensaje a la cafetería enviado:", message.sid))
-      .catch(error => console.error("Error al enviar mensaje a la cafetería:", error));
+      });
+      console.log("Mensaje a la cafetería enviado:", messageToCoffeeShop.sid);
+    } catch (error) {
+      console.error("Error al enviar mensaje a la cafetería:", error);
+      return res.sendStatus(500);
+    }
+  } else {
+    console.error("Metadata incompleta en paymentIntent");
+    return res.sendStatus(400);
   }
 
   res.sendStatus(200)
