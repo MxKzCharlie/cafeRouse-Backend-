@@ -3,9 +3,51 @@ console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY);
 const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const twilio = require("twilio")(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
 
 router.post('/create-checkout-session', async (req, res) => {
-  const total = req.body.total * 100;
+  const { dataClient, orderDetails } = req.body;
+        
+    function buildNumber(number){
+      const list = number.split(/[- ]/);
+      const finalNumber = list.join("");
+        
+      return finalNumber;
+    }
+
+    function buildOrder(order) {
+        let newOrderList = [...order];
+    
+        for(let i = 0; i < newOrderList.length; i++){
+            let detailsText = newOrderList[i][1].join("-");
+            newOrderList[i][1] = detailsText;
+            let singleOrder = newOrderList[i].join(";");
+            newOrderList[i] = singleOrder;
+        }
+    
+        const finalOrderText = newOrderList.join(" <=> ");
+        return finalOrderText;
+    }
+
+    function buildAdress(dataClient) {
+        let finalAdressList = [];
+        const keyToCheck = ['Address', 'Colonia', 'Delegation'];
+    
+        Object.entries(dataClient).forEach(([key, value]) => {
+            if(keyToCheck.includes(key)){
+                let textString = "";
+                textString = `${key}= ${value}`;
+                finalAdressList.push(textString);
+            }
+        });
+    
+        const finalAdress = finalAdressList.join(", ")
+        return finalAdress;
+    }
+    
+    const adress = buildAdress(dataClient);
+    const numTel = buildNumber(dataClient.Numero);
+    const order = buildOrder(orderDetails);
   
   try {
     const session = await stripe.checkout.sessions.create({
@@ -20,9 +62,17 @@ router.post('/create-checkout-session', async (req, res) => {
           quantity: 1,
         },
       ],
+      metadata: {
+        numTel: numTel,
+        adress: adress,
+        order: order,
+        total: dataClient.total,
+        pago: dataClient.Pago,
+        nombre: dataClient.Nombre
+      },
       mode: 'payment',
-      success_url: 'https://caferouse.com/tienda/thankyou/delivery/',
-      cancel_url: 'https://caferouse.com/tienda/pagar/',
+      success_url: 'https://caferouse.com/tienda/thankyou/',
+      cancel_url: 'https://caferouse.com',
     });
     res.json({ url: session.url });
   } catch (error) {
@@ -30,4 +80,48 @@ router.post('/create-checkout-session', async (req, res) => {
   }
 });
 
+//<---------- WebHook de STRIPE ---------->
+
+router.post('/webhook', async (req, res) => {
+  const endpointSecret = "whsec_CdWXbyIgbc70v00OMiMAS3OJMiizxVU8"; 
+  const sig = req.headers["stripe-signature"];
+
+  let event;
+  try {
+      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+  } catch (error) {
+      console.log(`Webhook signature verification failed: ${error}`);
+      return res.sendStatus(400);
+  }
+
+  if (event.type === "payment_intent.succeeded") {
+    const paymentIntent = event.data.object;
+
+    //Message for Client
+    twilio.messages.create({
+        contentVariables: JSON.stringify({"1": paymentIntent.metadata.nombre}),
+        contentSid: 'HX7c85110cce002b720781987578f54036',
+        from: '+14702038017',
+        to: paymentIntent.metadata.numTel,
+    }).then(message => console.log("Mensaje al cliente enviado:", message.sid))
+      .catch(error => console.error("Error al enviar mensaje al cliente:", error));
+
+    //Message for coffee shop
+    twilio.messages.create({
+        contentVariables: JSON.stringify({
+            "1": paymentIntent.metadata.nombre,
+            "2": paymentIntent.metadata.order,
+            "3": `$${paymentIntent.metadata.total}`,
+            "4": paymentIntent.metadata.pago,
+            "5": paymentIntent.metadata.adress
+        }),
+        contentSid: 'HX468c83f64d824575ee3b44f06a908631',
+        from: '+14702038017',
+        to: '+526647354900',
+    }).then(message => console.log("Mensaje a la cafetería enviado:", message.sid))
+      .catch(error => console.error("Error al enviar mensaje a la cafetería:", error));
+  }
+
+  res.sendStatus(200)
+});
 module.exports = router;
