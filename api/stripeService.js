@@ -8,47 +8,47 @@ const twilio = require("twilio")(process.env.TWILIO_ACCOUNT_SID, process.env.TWI
 router.post('/create-checkout-session', async (req, res) => {
   const { dataClient, orderDetails } = req.body;
         
-    function buildNumber(number){
-      const list = number.split(/[- ]/);
-      const finalNumber = list.join("");
-        
-      return finalNumber;
-    }
+  function buildNumber(number){
+    const list = number.split(/[- ]/);
+    const finalNumber = list.join("");
+      
+    return finalNumber;
+  }
 
-    function buildOrder(order) {
-        let newOrderList = [...order];
-    
-        for(let i = 0; i < newOrderList.length; i++){
-            let detailsText = newOrderList[i][1].join("-");
-            newOrderList[i][1] = detailsText;
-            let singleOrder = newOrderList[i].join(";");
-            newOrderList[i] = singleOrder;
-        }
-    
-        const finalOrderText = newOrderList.join(" <=> ");
-        return finalOrderText;
-    }
-
-    function buildAdress(dataClient) {
-        let finalAdressList = [];
-        const keyToCheck = ['Address', 'Colonia', 'Delegation'];
-    
-        Object.entries(dataClient).forEach(([key, value]) => {
-            if(keyToCheck.includes(key)){
-                let textString = "";
-                textString = `${key}= ${value}`;
-                finalAdressList.push(textString);
-            }
-        });
-    
-        const finalAdress = finalAdressList.join(", ")
-        return finalAdress;
-    }
-    
-    const adress = buildAdress(dataClient);
-    const numTel = buildNumber(dataClient.Numero);
-    const order = buildOrder(orderDetails);
+  function buildOrder(order) {
+      let newOrderList = [...order];
   
+      for(let i = 0; i < newOrderList.length; i++){
+          let detailsText = newOrderList[i][1].join("-");
+          newOrderList[i][1] = detailsText;
+          let singleOrder = newOrderList[i].join(";");
+          newOrderList[i] = singleOrder;
+      }
+  
+      const finalOrderText = newOrderList.join(" <=> ");
+      return finalOrderText;
+  }
+
+  function buildAdress(dataClient) {
+      let finalAdressList = [];
+      const keyToCheck = ['Address', 'Colonia', 'Delegation'];
+  
+      Object.entries(dataClient).forEach(([key, value]) => {
+          if(keyToCheck.includes(key)){
+              let textString = "";
+              textString = `${key}= ${value}`;
+              finalAdressList.push(textString);
+          }
+      });
+  
+      const finalAdress = finalAdressList.join(", ")
+      return finalAdress;
+  }
+    
+  const adress = buildAdress(dataClient);
+  const numTel = buildNumber(dataClient.Numero);
+  const order = buildOrder(orderDetails);
+
   try {
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
