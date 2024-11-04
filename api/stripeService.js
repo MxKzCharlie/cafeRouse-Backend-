@@ -1,5 +1,4 @@
 require('dotenv').config();
-console.log("Stripe Secret Key:", process.env.STRIPE_SECRET_KEY);
 const express = require('express');
 const router = express.Router();
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
@@ -7,6 +6,7 @@ const twilio = require("twilio")(process.env.TWILIO_ACCOUNT_SID, process.env.TWI
 
 router.post('/create-checkout-session', async (req, res) => {
   const { dataClient, orderDetails } = req.body;
+  const totalAmount = dataClient.total * 100;
         
   function buildNumber(number){
     const list = number.split(/[- ]/);
@@ -57,7 +57,7 @@ router.post('/create-checkout-session', async (req, res) => {
           price_data: {
             currency: 'mxn',
             product: 'prod_R8YPyL0vvCxTLS',
-            unit_amount: total,
+            unit_amount: totalAmount,
           },
           quantity: 1,
         },
