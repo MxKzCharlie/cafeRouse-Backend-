@@ -102,7 +102,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
         contentVariables: JSON.stringify({ "1": paymentIntent.metadata.nombre }),
         contentSid: 'HX7c85110cce002b720781987578f54036',
         from: '+14702038017',
-        to: paymentIntent.metadata.numTel,
+        to: String(paymentIntent.metadata.numTel),
       });
       console.log("Mensaje al cliente enviado:", messageToClient.sid);
     } catch (error) {
