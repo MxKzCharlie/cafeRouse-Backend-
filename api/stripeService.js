@@ -88,10 +88,10 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
   let event;
   try {
-      event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
+    event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (error) {
-      console.log(`Webhook signature verification failed: ${error}`);
-      return res.sendStatus(400);
+    console.log(`Webhook signature verification failed: ${error}`);
+    return res.sendStatus(400);
   }
 
   if (event.type === "payment_intent.succeeded") {
