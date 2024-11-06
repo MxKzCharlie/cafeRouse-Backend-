@@ -97,45 +97,43 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
   console.log(event);
 
   if (event.type === "checkout.session.completed") {
-    const checkoutSession = event.data.object;
-    console.log(checkoutSession.metadata);
-    
+    const session = event.data.object;
 
-  //   try {
-  //     const messageToClient = await twilio.messages.create({
-  //       contentVariables: JSON.stringify({ "1": paymentIntent.metadata.nombre }),
-  //       contentSid: 'HX7c85110cce002b720781987578f54036',
-  //       from: '+14702038017',
-  //       to: updatedPaymentIntent.metadata.numTel,
-  //     });
-  //     console.log("Mensaje al cliente enviado:", messageToClient.sid);
-  //   } catch (error) {
-  //     console.error("Error al enviar mensaje al cliente:", error);
-  //     return res.sendStatus(500);
-  //   }
+    try {
+      const messageToClient = await twilio.messages.create({
+        contentVariables: JSON.stringify({ "1": session.metadata.nombre }),
+        contentSid: 'HX7c85110cce002b720781987578f54036',
+        from: '+14702038017',
+        to: session.metadata.numTel,
+      });
+      console.log("Mensaje al cliente enviado:", messageToClient.sid);
+    } catch (error) {
+      console.error("Error al enviar mensaje al cliente:", error);
+      return res.sendStatus(500);
+    }
 
-  //   // Mensaje para la cafetería
-  //   try {
-  //     const messageToCoffeeShop = await twilio.messages.create({
-  //       contentVariables: JSON.stringify({
-  //         "1": paymentIntent.metadata.nombre,
-  //         "2": paymentIntent.metadata.order,
-  //         "3": `$${paymentIntent.metadata.total}`,
-  //         "4": paymentIntent.metadata.pago,
-  //         "5": paymentIntent.metadata.adress
-  //       }),
-  //       contentSid: 'HX468c83f64d824575ee3b44f06a908631',
-  //       from: '+14702038017',
-  //       to: '+526647354900',
-  //     });
-  //     console.log("Mensaje a la cafetería enviado:", messageToCoffeeShop.sid);
-  //   } catch (error) {
-  //     console.error("Error al enviar mensaje a la cafetería:", error);
-  //     return res.sendStatus(500);
-  //   }
-  // } else {
-  //   console.error("Metadata incompleta en paymentIntent");
-  //   return res.sendStatus(400);
+    // Mensaje para la cafetería
+    try {
+      const messageToCoffeeShop = await twilio.messages.create({
+        contentVariables: JSON.stringify({
+          "1": session.metadata.nombre,
+          "2": session.metadata.order,
+          "3": `$${session.metadata.total}`,
+          "4": session.metadata.pago,
+          "5": session.metadata.adress
+        }),
+        contentSid: 'HX468c83f64d824575ee3b44f06a908631',
+        from: '+14702038017',
+        to: '+526643367495',
+      });
+      console.log("Mensaje a la cafetería enviado:", messageToCoffeeShop.sid);
+    } catch (error) {
+      console.error("Error al enviar mensaje a la cafetería:", error);
+      return res.sendStatus(500);
+    }
+  } else {
+    console.error("Metadata incompleta en paymentIntent");
+    return res.sendStatus(400);
   }
 
   res.sendStatus(200)
