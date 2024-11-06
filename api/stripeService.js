@@ -96,9 +96,8 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
   if (event.type === "payment_intent.succeeded") {
     const paymentIntent = event.data.object;
-
-    const updatedPaymentIntent = await stripe.paymentIntents.retrieve(paymentIntent.id);
-    console.log(updatedPaymentIntent.metadata);
+    console.log(paymentIntent);
+    
 
   //   try {
   //     const messageToClient = await twilio.messages.create({
