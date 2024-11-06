@@ -96,9 +96,9 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
   console.log(event);
 
-  if (event.type === "payment_intent.succeeded") {
-    const paymentIntent = event.data.object;
-    console.log(paymentIntent);
+  if (event.type === "checkout.session.completed") {
+    const checkoutSession = event.data.object;
+    console.log(checkoutSession.metadata);
     
 
   //   try {
