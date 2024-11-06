@@ -94,8 +94,6 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
     return res.sendStatus(400);
   }
 
-  console.log(event);
-
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
 
